@@ -33,6 +33,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+import supported_fmp_tickers
+
 # ────────────────────────────────────────────────────────────────────────
 # 💾 ──────────────────────────  Data Layer  ─────────────────────────────
 # ────────────────────────────────────────────────────────────────────────
@@ -463,11 +465,28 @@ def main():
     # ── Sidebar Inputs ───────────────────────────────────────────────
     with st.sidebar:
         st.header("1️⃣  Stock & Data Source")
-        ticker = st.text_input("Ticker (e.g., INFY.NS)", "INFY.NS")
+        if provider == "Financial Modeling Prep":
+            ticker = st.selectbox(
+                "Select Ticker (FMP supported)",
+                supported_fmp_tickers.supported_fmp_tickers,
+                index=0,
+                help="Only US, UK, and CA large caps are supported on FMP free plan."
+            )
+        else:
+            ticker = st.text_input("Ticker (e.g., INFY.NS)", "INFY.NS")
         provider = st.selectbox("Data provider", ["Financial Modeling Prep", "Yahoo Finance"], index=0)
         api_key = os.getenv("FMP_API_KEY", "demo")
         if provider == "Financial Modeling Prep" and api_key == "demo":
             st.warning("Using FMP demo key (shared, limited calls). Set FMP_API_KEY env var for your own key.")
+
+        # FMP free plan: only US, UK, CA stocks supported
+        unsupported_fmp = False
+        if provider == "Financial Modeling Prep":
+            if ticker.upper().endswith(".NS") or ticker.upper().endswith(".BO") or \
+               ticker.upper().endswith(".AX") or ticker.upper().endswith(".TO") or \
+               ticker.upper().endswith(".HK") or ticker.upper().endswith(".SZ") or ticker.upper().endswith(".SS"):
+                unsupported_fmp = True
+                st.error("FMP free plan only supports US, UK, and CA stocks. For NSE/BSE/other tickers, use Yahoo Finance as the data provider.")
 
         st.divider()
         st.header("2️⃣  Analysis Mode")
@@ -500,6 +519,9 @@ def main():
     if not ticker:
         st.info("Please enter a ticker symbol to begin analysis.")
         return
+
+    if provider == "Financial Modeling Prep" and unsupported_fmp:
+        st.stop()
 
     try:
         with st.spinner("Fetching data..."):
