@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: ivnse
+Version: 0.1.0
+Summary: Intrinsic-value engine with Streamlit UI
+Home-page: https://github.com/yourname/ivnse
+Author: Arup Roy
+Author-email: Arup Roy <arup@ivnse.com>
+Requires-Python: >=3.9
+Requires-Dist: streamlit>=1.28
+Requires-Dist: pandas
+Requires-Dist: plotly
+Requires-Dist: openpyxl
+Requires-Dist: nsepy
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: isort; extra == "dev"
+Requires-Dist: pyright; extra == "dev"
+Dynamic: author
+Dynamic: requires-python

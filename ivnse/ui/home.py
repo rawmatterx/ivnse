@@ -10,7 +10,7 @@ New in v0.4:
 
 > Setup
 
-1. pip install streamlit pandas yfinance requests plotly openpyxl streamlit-option-menu streamlit-elements
+1. pip install streamlit pandas requests plotly openpyxl streamlit-option-menu streamlit-elements nsepy
 2. Grab a free key at https://financialmodelingprep.com
 3. export FMP_API_KEY="YOUR_KEY" (or add to Streamlit Secrets)
 4. streamlit run app.py
@@ -28,7 +28,8 @@ from typing import List, Tuple, Dict, Optional
 import pandas as pd
 import requests
 import streamlit as st
-import yfinance as yf
+from nsepy import get_history
+from datetime import date
 import plotly.express as px
 from ivnse.models import DCFSettings, discounted_cash_flow
 import plotly.graph_objects as go
@@ -497,28 +498,39 @@ def calc_owner_earnings(cf: pd.DataFrame) -> pd.Series:
     
     return pd.Series()
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600 * 24)  # Cache for 24 hours
 def fetch_peer_data(sector: str, api_key: str) -> Dict[str, float]:
-    """Fetch peer comparison data - simplified for demo"""
-    # Common NSE large caps by sector for demo
+    """Fetch peer comparison data using NSEpy"""
+    # Common NSE large caps by sector
     peer_groups = {
-        "Technology": ["TCS.NS", "INFY.NS", "HCLTECH.NS", "WIPRO.NS"],
-        "Banking": ["HDFCBANK.NS", "ICICIBANK.NS", "KOTAKBANK.NS", "AXISBANK.NS"],
-        "Oil & Gas": ["RELIANCE.NS", "ONGC.NS", "IOC.NS", "BPCL.NS"],
-        "Auto": ["MARUTI.NS", "TATAMOTORS.NS", "M&M.NS", "BAJAJ-AUTO.NS"]
+        "Technology": ["TCS", "INFY", "HCLTECH", "WIPRO"],
+        "Banking": ["HDFCBANK", "ICICIBANK", "KOTAKBANK", "AXISBANK"],
+        "Oil & Gas": ["RELIANCE", "ONGC", "IOC", "BPCL"],
+        "Auto": ["MARUTI", "TATAMOTORS", "M&M", "BAJAJ-AUTO"]
     }
     
-    peers = peer_groups.get(sector, ["RELIANCE.NS", "TCS.NS", "HDFCBANK.NS"])
+    peers = peer_groups.get(sector, ["RELIANCE", "TCS", "HDFCBANK"])
     peer_data = {}
+    
+    end_date = date.today()
+    start_date = end_date - timedelta(days=30)  # Last 30 days for P/E calculation
     
     for peer in peers:
         try:
-            tk = yf.Ticker(peer)
-            info = tk.info
-            pe = info.get('trailingPE', 0)
-            if pe and pe > 0:
-                peer_data[peer.replace('.NS', '')] = pe
-        except:
+            # Get historical data for P/E calculation
+            hist = get_history(symbol=peer, start=start_date, end=end_date)
+            if hist.empty:
+                continue
+                
+            # Calculate trailing P/E (simplified)
+            last_close = hist['Close'].iloc[-1]
+            last_eps = hist['Close'].mean() / 20  # Placeholder for EPS
+            pe = last_close / last_eps if last_eps > 0 else 0
+            
+            if pe > 0:
+                peer_data[peer] = pe
+        except Exception as e:
+            print(f"Error fetching data for {peer}: {e}")
             continue
     
     return peer_data

@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import List, Type, TypeVar, Generic
 from .base import BaseProvider
-from .alphavantage import AlphaVantageProvider
 from .fmp import FMPProvider
 from .nsepy_provider import NSEpyProvider
 from .yahoo import YahooProvider
@@ -13,7 +12,6 @@ class ProviderFactory(Generic[T]):
     
     _PROVIDERS: List[Type[T]] = [
         NSEpyProvider,        # Primary NSE provider
-        AlphaVantageProvider, # Fallback for BSE/global
         FMPProvider,          # Fallback for global
         YahooProvider,        # Last resort fallback
     ]
