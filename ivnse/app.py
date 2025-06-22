@@ -1,16 +1,15 @@
 import streamlit as st
 from ivnse.ui_components.nav import main_nav
-import os
 
 # Apply global CSS (relative to repo root for Streamlit Cloud)
-css_path = os.path.join(os.path.dirname(__file__), 'ivnse', 'assets', 'ivnse.css')
+css_path = "ivnse/assets/ivnse.css"
 with open(css_path) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 main_nav()  # Top nav bar, sidebar, theme toggle
 
 # Streamlit multipage navigation: use native pages (no custom router needed)
-# Each page is a script in ivnse/pages/ and will be auto-discovered by Streamlit
+# Each page is a script in /pages/ and will be auto-discovered by Streamlit
 
 def main():
     st.title("ivnse: Intrinsic Value Calculator")
