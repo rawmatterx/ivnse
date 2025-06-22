@@ -1,4 +1,4 @@
-from services.valuation import discounted_cash_flow
+from ivnse.services.valuation import discounted_cash_flow
 
 def test_dcf_basic():
     # Simple DCF test
