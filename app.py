@@ -769,16 +769,17 @@ def main():
             st.subheader("Dividend History")
             if not div_df.empty and "dividend" in div_df.columns and len(div_df) > 0:
                 div_chart_df = div_df.tail(20).reset_index()
-                div_chart_df['date'] = pd.to_datetime(div_chart_df['date'])
-                
-                fig_div = px.line(div_chart_df, x='date', y='dividend',
-                                 title="Dividend Per Share (₹)",
-                                 markers=True)
-                fig_div.update_traces(line_color='orange', marker_color='orange')
-                st.plotly_chart(fig_div, use_container_width=True)
-                
+                if "date" in div_chart_df.columns:
+                    div_chart_df['date'] = pd.to_datetime(div_chart_df['date'])
+                    fig_div = px.line(div_chart_df, x='date', y='dividend',
+                                     title="Dividend Per Share (₹)",
+                                     markers=True)
+                    fig_div.update_traces(line_color='orange', marker_color='orange')
+                    st.plotly_chart(fig_div, use_container_width=True)
+                else:
+                    st.info("Dividend data available, but no date column to plot.")
                 # Dividend analysis
-                if len(div_df) > 1:
+                if len(div_df) > 1 and "date" in div_df.columns:
                     annual_divs = div_df.groupby(div_df.index.str[:4])['dividend'].sum()
                     if len(annual_divs) > 1:
                         div_growth_rate = ((annual_divs.iloc[-1] / annual_divs.iloc[-2]) - 1) * 100
