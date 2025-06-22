@@ -465,6 +465,7 @@ def main():
     # ── Sidebar Inputs ───────────────────────────────────────────────
     with st.sidebar:
         st.header("1️⃣  Stock & Data Source")
+        provider = st.selectbox("Data provider", ["Financial Modeling Prep", "Yahoo Finance"], index=0)
         if provider == "Financial Modeling Prep":
             ticker = st.selectbox(
                 "Select Ticker (FMP supported)",
@@ -474,7 +475,6 @@ def main():
             )
         else:
             ticker = st.text_input("Ticker (e.g., INFY.NS)", "INFY.NS")
-        provider = st.selectbox("Data provider", ["Financial Modeling Prep", "Yahoo Finance"], index=0)
         api_key = os.getenv("FMP_API_KEY", "demo")
         if provider == "Financial Modeling Prep" and api_key == "demo":
             st.warning("Using FMP demo key (shared, limited calls). Set FMP_API_KEY env var for your own key.")
