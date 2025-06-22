@@ -46,14 +46,12 @@ def _fetch_fmp_json(endpoint: str, ticker: str, api_key: str, params: dict | Non
     p = {"apikey": api_key}
     if params:
         p.update(params)
-    # Use '&apikey=' if params already exist
-    if '?' in url:
-        url += f"&apikey={api_key}"
-    else:
-        url += f"?apikey={api_key}"
     r = requests.get(url, params=p, timeout=15)
     if r.status_code == 403:
         st.error("FMP API returned 403 Forbidden. Check your API key, usage limits, or endpoint.")
+        st.stop()
+    if r.status_code == 401:
+        st.error("FMP API returned 401 Unauthorized. Please check your API key and ensure it is valid and not expired.")
         st.stop()
     r.raise_for_status()
     return r.json()
