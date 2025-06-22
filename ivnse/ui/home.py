@@ -30,6 +30,7 @@ import requests
 import streamlit as st
 import yfinance as yf
 import plotly.express as px
+from ivnse.models import DCFSettings, discounted_cash_flow
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -523,15 +524,8 @@ def fetch_peer_data(sector: str, api_key: str) -> Dict[str, float]:
     return peer_data
 
 # ────────────────────────────────────────────────────────────────────────
-# 📈 ──────────────────────────  Valuation Models  ──────────────────────
+# ──────────────────────────  Valuation Models  ──────────────────────
 # ────────────────────────────────────────────────────────────────────────
-
-@dataclass
-class DCFSettings:
-    growth_rates: List[float]
-    discount_rate: float
-    terminal_growth: float
-    shares_outstanding: float
 
 @dataclass
 class ScenarioSettings:
@@ -540,25 +534,6 @@ class ScenarioSettings:
     discount_rate_adj: float
     terminal_growth_adj: float
 
-def discounted_cash_flow(last_owner_earnings: float, settings: DCFSettings) -> float:
-    if math.isnan(last_owner_earnings) or last_owner_earnings <= 0:
-        return math.nan
-    
-    flows = []
-    oe = last_owner_earnings
-    for g in settings.growth_rates:
-        oe *= (1 + g)
-        flows.append(oe)
-    
-    # Terminal value
-    terminal_value = flows[-1] * (1 + settings.terminal_growth) / (
-        settings.discount_rate - settings.terminal_growth
-    )
-    flows.append(terminal_value)
-    
-    # Present value calculation
-    pv = sum(f / (1 + settings.discount_rate) ** (i + 1) for i, f in enumerate(flows))
-    return pv / settings.shares_outstanding if settings.shares_outstanding else math.nan
 
 @dataclass
 class DDMSettings:
