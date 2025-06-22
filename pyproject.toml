@@ -6,18 +6,21 @@ build-backend = "setuptools.build_meta"
 name = "ivnse"
 version = "0.1.0"
 description = "Intrinsic-value engine with Streamlit UI"
-authors = [{ name = "Arup Roy", email = "..." }]
+authors = [{ name = "Arup Roy", email = "arup@ivnse.com" }]
 requires-python = ">=3.10"
 dependencies = [
   "streamlit>=1.28",
   "pandas",
-  "yfinance",
   "plotly",
-  "openpyxl"
+  "openpyxl",
+  "nsepy"
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "isort", "pyright"]
 
-[tool.setuptools.packages.find]
-where = ["."]
+[tool.setuptools]
+packages = {find = {where = ["."]}}
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md"}

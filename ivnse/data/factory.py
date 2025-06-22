@@ -3,6 +3,7 @@ from typing import List, Type, TypeVar, Generic
 from .base import BaseProvider
 from .alphavantage import AlphaVantageProvider
 from .fmp import FMPProvider
+from .nsepy_provider import NSEpyProvider
 from .yahoo import YahooProvider
 
 T = TypeVar('T', bound=BaseProvider)
@@ -11,9 +12,10 @@ class ProviderFactory(Generic[T]):
     """Factory for creating data providers with fallbacks."""
     
     _PROVIDERS: List[Type[T]] = [
-        AlphaVantageProvider,  # NSE/BSE & global backup
-        FMPProvider,          # Primary global provider
-        YahooProvider,        # Fallback for global
+        NSEpyProvider,        # Primary NSE provider
+        AlphaVantageProvider, # Fallback for BSE/global
+        FMPProvider,          # Fallback for global
+        YahooProvider,        # Last resort fallback
     ]
 
     @classmethod

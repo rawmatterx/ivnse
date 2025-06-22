@@ -416,16 +416,43 @@ def fetch_fundamentals_fmp(ticker: str, api_key: str) -> Tuple[pd.DataFrame, pd.
     return cf_df, div_df, profile, income_df
 
 @st.cache_data(ttl=3600)
-def fetch_fundamentals_yahoo(ticker: str):
+def fetch_fundamentals_nsepy(ticker: str):
     try:
-        tk = yf.Ticker(ticker)
-        cf = tk.cashflow.T if hasattr(tk.cashflow, 'T') else pd.DataFrame()
-        div = tk.dividends.to_frame(name="dividend") if not tk.dividends.empty else pd.DataFrame()
-        income = tk.financials.T if hasattr(tk.financials, 'T') else pd.DataFrame()
-        info = tk.info
-        return cf, div, info, income
+        # Remove .NS suffix if present for NSEpy
+        clean_ticker = ticker.replace('.NS', '')
+        
+        # Get data from NSEpy provider
+        provider = ProviderFactory.get_provider(clean_ticker)
+        
+        # Get quote for basic info
+        quote = provider.get_quote(clean_ticker)
+        
+        # Get fundamentals (limited data available)
+        fundamentals = provider.get_fundamentals(clean_ticker)
+        
+        # Create empty DataFrames for cashflow and income
+        cf = pd.DataFrame()
+        div = pd.DataFrame()
+        income = pd.DataFrame()
+        
+        # Create profile dictionary
+        profile = {
+            'companyName': fundamentals.get('companyName', clean_ticker),
+            'sector': fundamentals.get('sector', 'N/A'),
+            'industry': fundamentals.get('industry', 'N/A'),
+            'marketCap': fundamentals.get('marketCap'),
+            'currentPrice': quote.get('price'),
+            'previousClose': quote.get('previous_close'),
+            'volume': quote.get('volume'),
+            'currency': 'INR',
+            'exchange': 'NSE',
+            'quoteType': 'EQUITY'
+        }
+        
+        return cf, div, profile, income
+        
     except Exception as e:
-        st.error(f"Yahoo Finance error: {e}")
+        st.error(f"Error fetching data from NSEpy: {e}")
         return pd.DataFrame(), pd.DataFrame(), {}, pd.DataFrame()
 
 def calc_owner_earnings(cf: pd.DataFrame) -> pd.Series:
@@ -852,18 +879,56 @@ def main():
         
         # Stock Input Section
         st.markdown("#### 1️⃣ Stock Selection")
-        ticker = st.text_input(
-            "Enter NSE Ticker", 
-            value="INFY.NS",
-            placeholder="e.g., TCS.NS, RELIANCE.NS",
-            help="Enter NSE stock symbol with .NS suffix"
+        
+        # Popular NSE stocks with company names for better UX
+        nse_stocks = {
+            'RELIANCE.NS': 'Reliance Industries',
+            'TCS.NS': 'Tata Consultancy Services',
+            'HDFCBANK.NS': 'HDFC Bank',
+            'ICICIBANK.NS': 'ICICI Bank',
+            'INFY.NS': 'Infosys',
+            'HINDUNILVR.NS': 'Hindustan Unilever',
+            'ITC.NS': 'ITC Limited',
+            'BHARTIARTL.NS': 'Bharti Airtel',
+            'KOTAKBANK.NS': 'Kotak Mahindra Bank',
+            'AXISBANK.NS': 'Axis Bank',
+            'LT.NS': 'Larsen & Toubro',
+            'SBIN.NS': 'State Bank of India',
+            'BAJFINANCE.NS': 'Bajaj Finance',
+            'ASIANPAINT.NS': 'Asian Paints',
+            'HCLTECH.NS': 'HCL Technologies',
+            'MARUTI.NS': 'Maruti Suzuki',
+            'TITAN.NS': 'Titan Company',
+            'SUNPHARMA.NS': 'Sun Pharmaceutical',
+            'TATAMOTORS.NS': 'Tata Motors',
+            'NTPC.NS': 'NTPC Limited'
+        }
+        
+        # Create a formatted list for the selectbox
+        stock_options = [f"{symbol} - {name}" for symbol, name in nse_stocks.items()]
+        
+        # Default selection (Infosys)
+        default_idx = list(nse_stocks.keys()).index('INFY.NS')
+        
+        # Searchable dropdown with better accessibility
+        selected_stock = st.selectbox(
+            "Select a stock",
+            options=stock_options,
+            index=default_idx,
+            format_func=lambda x: x,  # Show both symbol and name
+            help="Search and select from popular NSE stocks",
+            key="stock_selector"
         )
         
+        # Extract just the ticker symbol from the selection
+        ticker = selected_stock.split(" - ")[0]
+        
+        # Data Provider Selection
         provider = st.selectbox(
             "📊 Data Provider", 
-            ["Financial Modeling Prep", "Yahoo Finance"], 
+            ["NSEpy", "Financial Modeling Prep"], 
             index=0,
-            help="FMP recommended for Indian markets"
+            help="Select data provider for financial data"
         )
         
         api_key = os.getenv("FMP_API_KEY", "demo")
@@ -951,10 +1016,14 @@ def main():
         status_text.text("🔄 Fetching financial data...")
         progress_bar.progress(25)
         
-        if provider.startswith("Financial"):
+        if provider == "Financial Modeling Prep":
+            api_key = st.secrets.get("FMP_API_KEY")
+            if not api_key or api_key == "your_financial_modeling_prep_api_key_here":
+                st.error("Please set your FMP API key in the secrets.toml file")
+                st.stop()
             cf_df, div_df, profile, income_df = fetch_fundamentals_fmp(ticker, api_key)
         else:
-            cf_df, div_df, profile, income_df = fetch_fundamentals_yahoo(ticker)
+            cf_df, div_df, profile, income_df = fetch_fundamentals_nsepy(ticker)
         
         progress_bar.progress(75)
         status_text.text("📊 Processing financial metrics...")
