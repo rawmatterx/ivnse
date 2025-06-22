@@ -5,6 +5,7 @@ Entry point for the application.
 
 from ivnse.ui.home import main
 from ivnse.models import DCFSettings, discounted_cash_flow
+from typing import Optional
 
 if __name__ == "__main__":
     main()
