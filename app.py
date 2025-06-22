@@ -453,17 +453,123 @@ def create_excel_report(ticker: str, valuations: dict, ratios: dict, historical_
     return output.getvalue()
 
 # ────────────────────────────────────────────────────────────────────────
+# 🎨 ──────────────────────────  Modern UI Styling  ──────────────────────
+# ────────────────────────────────────────────────────────────────────────
+def apply_modern_styling():
+    """Apply modern CSS styling with glassmorphism and animations"""
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    :root {
+        --primary-color: #6366f1;
+        --secondary-color: #8b5cf6;
+        --accent-color: #06d6a0;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --success-color: #10b981;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-glass: rgba(255, 255, 255, 0.25);
+        --border-color: rgba(255, 255, 255, 0.18);
+        --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        --border-radius: 16px;
+    }
+    .main .block-container { padding-top: 2rem; padding-bottom: 2rem; font-family: 'Inter', sans-serif; }
+    .custom-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5rem; font-weight: 700; text-align: center; margin-bottom: 2rem; animation: fadeInUp 1s ease-out; }
+    .custom-subheader { color: var(--text-secondary); text-align: center; font-size: 1.2rem; margin-bottom: 3rem; font-weight: 400; }
+    .glass-card { background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: var(--border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow); padding: 2rem; margin: 1rem 0; transition: all 0.3s ease; }
+    .glass-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px 0 rgba(31, 38, 135, 0.5); }
+    .modern-metric { background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); border-radius: var(--border-radius); padding: 1.5rem; text-align: center; border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .modern-metric::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: left 0.5s; }
+    .modern-metric:hover::before { left: 100%; }
+    .modern-metric:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    .metric-value { font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; }
+    .metric-label { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .progress-container { background: #e5e7eb; border-radius: 10px; height: 8px; overflow: hidden; margin: 1rem 0; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); border-radius: 10px; transition: width 1.5s ease-in-out; animation: shimmer 2s infinite; }
+    @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+    .nav-container { background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: var(--border-radius); padding: 1rem; margin-bottom: 2rem; border: 1px solid var(--border-color); }
+    .stButton > button { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 12px; padding: 0.75rem 2rem; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3); }
+    .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4); }
+    .css-1d391kg { background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%); }
+    .chart-container { background: var(--bg-primary); border-radius: var(--border-radius); padding: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin: 1rem 0; border: 1px solid rgba(0,0,0,0.05); }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fade-in { animation: fadeIn 0.8s ease-out; }
+    .fade-in-up { animation: fadeInUp 0.8s ease-out; }
+    .status-positive { color: var(--success-color); background: rgba(16, 185, 129, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+    .status-negative { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+    .status-neutral { color: var(--warning-color); background: rgba(245, 158, 11, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+    .info-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: var(--border-radius); margin: 1rem 0; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3); }
+    .warning-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: var(--border-radius); margin: 1rem 0; box-shadow: 0 8px 32px rgba(245, 87, 108, 0.3); }
+    #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--primary-color), var(--secondary-color)); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--secondary-color); }
+    @media (max-width: 768px) { .custom-header { font-size: 2.5rem; } .modern-metric { margin-bottom: 1rem; } .glass-card { padding: 1rem; } }
+    </style>
+    """, unsafe_allow_html=True)
+
+def create_modern_header():
+    st.markdown("""
+    <div class="custom-header">
+        📈 Intrinsic Value Calculator
+    </div>
+    <div class="custom-subheader">
+        Professional NSE Stock Valuation with Advanced Analytics
+    </div>
+    """, unsafe_allow_html=True)
+
+def create_metric_card(label: str, value: str, delta: Optional[str] = None, delta_color: str = "normal"):
+    delta_class = ""
+    if delta:
+        if delta_color == "inverse":
+            delta_class = "status-positive"
+        elif "negative" in delta_color or delta.startswith("-"):
+            delta_class = "status-negative"
+        else:
+            delta_class = "status-neutral"
+    delta_html = f'<div class="{delta_class}">{delta}</div>' if delta else ""
+    return f"""
+    <div class="modern-metric fade-in-up">
+        <div class="metric-value">{value}</div>
+        <div class="metric-label">{label}</div>
+        {delta_html}
+    </div>
+    """
+def create_info_card(title: str, content: str, card_type: str = "info"):
+    card_class = "info-card" if card_type == "info" else "warning-card"
+    return f"""
+    <div class="{card_class} fade-in">
+        <h3 style="margin-top: 0; font-weight: 600;">{title}</h3>
+        <p style="margin-bottom: 0; line-height: 1.6;">{content}</p>
+    </div>
+    """
+
+# ────────────────────────────────────────────────────────────────────────
 # 🧮 ───────────────────────  Streamlit  UI  ─────────────────────────────
 # ────────────────────────────────────────────────────────────────────────
 
 def main():
-    st.set_page_config("Enhanced Intrinsic Value Calculator", layout="wide")
-    st.title("📊 Enhanced Intrinsic Value Calculator — NSE Edition v0.3")
-    
-    # ── Sidebar Inputs ───────────────────────────────────────────────
+    st.set_page_config(
+        page_title="Intrinsic Value Calculator",
+        page_icon="📈",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    apply_modern_styling()
+    create_modern_header()
+    # ── Modern Sidebar Navigation ────────────────────────────────────────
     with st.sidebar:
-        st.header("1️⃣  Stock & Data Source")
-        provider = st.selectbox("Data provider", ["Financial Modeling Prep", "Yahoo Finance"], index=0)
+        st.markdown('<div class="nav-container">', unsafe_allow_html=True)
+        st.markdown("### 🎛️ Control Panel")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("#### 1️⃣ Stock Selection")
+        provider = st.selectbox(
+            "Data provider", ["Financial Modeling Prep", "Yahoo Finance"], index=0)
         if provider == "Financial Modeling Prep":
             ticker = st.selectbox(
                 "Select Ticker (FMP supported)",
@@ -475,29 +581,23 @@ def main():
             ticker = st.text_input("Ticker (e.g., INFY.NS)", "INFY.NS")
         api_key = os.getenv("FMP_API_KEY", "demo")
         if provider == "Financial Modeling Prep" and api_key == "demo":
-            st.warning("Using FMP demo key (shared, limited calls). Set FMP_API_KEY env var for your own key.")
-
-        # FMP free plan: only US, UK, CA stocks supported
-        unsupported_fmp = False
-        if provider == "Financial Modeling Prep":
-            if ticker.upper().endswith(".NS") or ticker.upper().endswith(".BO") or \
-               ticker.upper().endswith(".AX") or ticker.upper().endswith(".TO") or \
-               ticker.upper().endswith(".HK") or ticker.upper().endswith(".SZ") or ticker.upper().endswith(".SS"):
-                unsupported_fmp = True
-                st.error("FMP free plan only supports US, UK, and CA stocks. For NSE/BSE/other tickers, use Yahoo Finance as the data provider.")
-
+            st.markdown(create_info_card(
+                "Demo Mode",
+                "Using shared demo key. Set FMP_API_KEY environment variable for unlimited access.",
+                "warning"
+            ), unsafe_allow_html=True)
         st.divider()
-        st.header("2️⃣  Analysis Mode")
-        analysis_mode = st.selectbox("Select analysis", 
-                                   ["Basic Valuation", "Scenario Analysis", "Peer Comparison", "Comprehensive Report"])
-
+        st.markdown("#### 2️⃣ Analysis Mode")
+        analysis_mode = st.selectbox(
+            "Select analysis",
+            ["Basic Valuation", "Scenario Analysis", "Peer Comparison", "Comprehensive Report"]
+        )
         st.divider()
-        st.header("3️⃣  DCF Assumptions")
+        st.markdown("#### 3️⃣ DCF Assumptions")
         discount_rate = st.slider("Discount rate (%)", 6.0, 20.0, 12.0) / 100
         terminal_growth = st.slider("Terminal growth (%)", 0.0, 5.0, 2.0) / 100
-        
         if analysis_mode == "Scenario Analysis":
-            st.subheader("Scenario Settings")
+            st.markdown("##### Scenario Settings")
             base_growth = st.number_input("Base case growth (%)", 0.0, 30.0, 12.0)
             bull_multiplier = st.slider("Bull case multiplier", 1.0, 2.0, 1.5)
             bear_multiplier = st.slider("Bear case multiplier", 0.3, 1.0, 0.7)
@@ -505,14 +605,11 @@ def main():
             base_growth = st.number_input("Growth yrs 1‑3 (%)", 0.0, 30.0, 12.0)
             mid_growth = st.number_input("Growth yrs 4‑7 (%)", 0.0, 20.0, 8.0)
             tail_growth = st.number_input("Growth yrs 8‑10 (%)", 0.0, 10.0, 5.0)
-
         st.divider()
-        st.header("4️⃣  DDM Assumptions")
+        st.markdown("#### 4️⃣ DDM Assumptions")
         div_growth = st.slider("Dividend growth (%)", 0.0, 15.0, 8.0) / 100
-
         st.divider()
         mos = st.slider("Margin of safety (%)", 0, 50, 20)
-
     # ── Fetch Data ───────────────────────────────────────────────────
     if not ticker:
         st.info("Please enter a ticker symbol to begin analysis.")
@@ -890,6 +987,19 @@ def main():
         
         for tip in tips:
             st.write(tip)
+
+    # FMP free plan: only US, UK, CA stocks supported
+    unsupported_fmp = False
+    if provider == "Financial Modeling Prep":
+        if ticker.upper().endswith(".NS") or ticker.upper().endswith(".BO") or \
+           ticker.upper().endswith(".AX") or ticker.upper().endswith(".TO") or \
+           ticker.upper().endswith(".HK") or ticker.upper().endswith(".SZ") or ticker.upper().endswith(".SS"):
+            unsupported_fmp = True
+            st.markdown(create_info_card(
+                "Unsupported Ticker",
+                "FMP free plan only supports US, UK, and CA stocks. For NSE/BSE/other tickers, use Yahoo Finance as the data provider.",
+                "warning"
+            ), unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
