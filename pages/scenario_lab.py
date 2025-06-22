@@ -1,6 +1,6 @@
 import streamlit as st
+from ivnse.core import fetch_fundamentals_yahoo, discounted_cash_flow, create_metric_card
 import math
-import yfinance as yf
 import pandas as pd
 
 st.title("Scenario Lab")
@@ -17,28 +17,11 @@ if not ticker:
     st.info("Enter a ticker to run scenario analysis.")
     st.stop()
 
-tk = yf.Ticker(ticker)
-info = tk.info
-shares_out = info.get("sharesOutstanding") or info.get("marketCap", 0) / max(info.get("previousClose", 1), 1)
+cf_df, _, profile, _ = fetch_fundamentals_yahoo(ticker)
+shares_out = profile.get("sharesOutstanding") or profile.get("marketCap", 0) / max(profile.get("previousClose", 1), 1)
 if not shares_out:
     shares_out = 1e9
-last_price = info.get("previousClose") or math.nan
-
-# Dummy owner earnings for demo
-last_oe = 10000000000
-
-def discounted_cash_flow(last_owner_earnings, growth_rates, discount_rate, terminal_growth, shares_outstanding):
-    if math.isnan(last_owner_earnings) or last_owner_earnings <= 0:
-        return math.nan
-    flows = []
-    oe = last_owner_earnings
-    for g in growth_rates:
-        oe *= (1 + g)
-        flows.append(oe)
-    terminal_value = flows[-1] * (1 + terminal_growth) / (discount_rate - terminal_growth)
-    flows.append(terminal_value)
-    pv = sum(f / (1 + discount_rate) ** (i + 1) for i, f in enumerate(flows))
-    return pv / shares_outstanding if shares_outstanding else math.nan
+last_oe = 10000000000  # For demo, you can use calc_owner_earnings(cf_df) if you want real data
 
 scenarios = [
     ("🐻 Bear", base_growth/100 * bear_multiplier),
@@ -58,4 +41,4 @@ st.bar_chart(df.set_index("Scenario")['Fair Value'])
 cols = st.columns(3)
 for i, row in df.iterrows():
     with cols[i]:
-        st.metric(row['Scenario'], f"₹{row['Fair Value']:,.0f}")
+        st.markdown(create_metric_card(row['Scenario'], f"₹{row['Fair Value']:,.0f}"), unsafe_allow_html=True)

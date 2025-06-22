@@ -1,14 +1,7 @@
 import streamlit as st
-import yfinance as yf
+from ivnse.core import fetch_fundamentals_yahoo, create_metric_card
 import pandas as pd
-from ivnse.ui_components.cards import glass_card
 
-glass_card("""
-<h2>Peer Comparison</h2>
-<p>Sortable, searchable peer table coming soon.</p>
-""")
-
-# --- Demo peer groups ---
 peer_groups = {
     "Technology": ["TCS.NS", "INFY.NS", "HCLTECH.NS", "WIPRO.NS"],
     "Banking": ["HDFCBANK.NS", "ICICIBANK.NS", "KOTAKBANK.NS", "AXISBANK.NS"],
@@ -24,11 +17,10 @@ peers = peer_groups[sector]
 
 peer_data = []
 for peer in peers:
-    tk = yf.Ticker(peer)
-    info = tk.info
-    pe = info.get('trailingPE', 0)
-    price = info.get('previousClose', 0)
-    market_cap = info.get('marketCap', 0)
+    _, _, profile, _ = fetch_fundamentals_yahoo(peer)
+    pe = profile.get('trailingPE', 0)
+    price = profile.get('previousClose', 0)
+    market_cap = profile.get('marketCap', 0)
     peer_data.append({
         "Ticker": peer,
         "Price": price,

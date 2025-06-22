@@ -1,77 +1,7 @@
 import streamlit as st
+from ivnse.core import fetch_fundamentals_yahoo, calc_owner_earnings, discounted_cash_flow, dividend_discount_model, create_metric_card
 import math
-import os
-import pandas as pd
-import yfinance as yf
-from datetime import date, datetime
-from typing import Optional
-from ivnse.ui_components.cards import glass_card
 
-# --- Modern UI helpers (minimal for now) ---
-def create_metric_card(label: str, value: str, delta: Optional[str] = None, delta_color: str = "normal"):
-    delta_html = f'<div style="color:green;font-weight:600">{delta}</div>' if delta else ""
-    return f"""
-    <div style='background:rgba(255,255,255,0.15);backdrop-filter:blur(16px);border-radius:16px;padding:1.5rem;margin-bottom:1rem;text-align:center;'>
-        <div style='font-size:2rem;font-weight:700;color:#6366f1'>{value}</div>
-        <div style='color:#6b7280;font-size:0.9rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em'>{label}</div>
-        {delta_html}
-    </div>
-    """
-
-def fetch_fundamentals_yahoo(ticker: str):
-    try:
-        tk = yf.Ticker(ticker)
-        cf = tk.cashflow.T if hasattr(tk.cashflow, 'T') else pd.DataFrame()
-        div = tk.dividends.to_frame(name="dividend") if not tk.dividends.empty else pd.DataFrame()
-        income = tk.financials.T if hasattr(tk.financials, 'T') else pd.DataFrame()
-        info = tk.info
-        return cf, div, info, income
-    except Exception as e:
-        st.error(f"Yahoo Finance error: {e}")
-        return pd.DataFrame(), pd.DataFrame(), {}, pd.DataFrame()
-
-def calc_owner_earnings(cf: pd.DataFrame) -> pd.Series:
-    if cf.empty:
-        return pd.Series()
-    cfo_cols = ["operatingCashFlow", "Total Cash From Operating Activities", "netCashProvidedByOperatingActivities"]
-    capex_cols = ["capitalExpenditure", "Capital Expenditures", "capitalExpenditures"]
-    cfo = None
-    capex = None
-    for col in cfo_cols:
-        if col in cf.columns:
-            cfo = cf[col]
-            break
-    for col in capex_cols:
-        if col in cf.columns:
-            capex = cf[col]
-            break
-    if cfo is not None and capex is not None:
-        try:
-            return (cfo + capex).astype(float)
-        except:
-            return pd.Series()
-    return pd.Series()
-
-def discounted_cash_flow(last_owner_earnings: float, growth_rates, discount_rate, terminal_growth, shares_outstanding):
-    if math.isnan(last_owner_earnings) or last_owner_earnings <= 0:
-        return math.nan
-    flows = []
-    oe = last_owner_earnings
-    for g in growth_rates:
-        oe *= (1 + g)
-        flows.append(oe)
-    terminal_value = flows[-1] * (1 + terminal_growth) / (discount_rate - terminal_growth)
-    flows.append(terminal_value)
-    pv = sum(f / (1 + discount_rate) ** (i + 1) for i, f in enumerate(flows))
-    return pv / shares_outstanding if shares_outstanding else math.nan
-
-def dividend_discount_model(last_dividend: float, dividend_growth: float, discount_rate: float) -> float:
-    if last_dividend <= 0 or discount_rate <= dividend_growth:
-        return 0
-    next_div = last_dividend * (1 + dividend_growth)
-    return next_div / (discount_rate - dividend_growth)
-
-# --- UI ---
 st.title("Valuation")
 st.markdown("Enter a ticker in the sidebar to run a full DCF & DDM valuation.")
 
@@ -89,7 +19,7 @@ if not ticker:
     st.stop()
 
 cf_df, div_df, profile, income_df = fetch_fundamentals_yahoo(ticker)
-shares_out = profile.get("sharesOutstanding") or profile.get("mktCap", 0) / max(profile.get("previousClose", 1), 1)
+shares_out = profile.get("sharesOutstanding") or profile.get("marketCap", 0) / max(profile.get("previousClose", 1), 1)
 if not shares_out:
     shares_out = 1e9
 last_price = profile.get("previousClose") or math.nan
@@ -124,8 +54,3 @@ with col4:
 with col5:
     upside_text = f"{upside:+.1f}%" if not math.isnan(upside) else "—"
     st.markdown(create_metric_card("Upside", upside_text), unsafe_allow_html=True)
-
-glass_card("""
-<h2>Valuation Page</h2>
-<p>Run DCF, DDM, and more. (UI/logic to be implemented.)</p>
-""")

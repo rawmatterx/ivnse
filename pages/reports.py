@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import date
+from ivnse.core import create_info_card
 
 st.title("Reports & Export")
 st.markdown("Download Excel/CSV, view historical valuations, and more.")
@@ -22,3 +23,5 @@ with col1:
 with col2:
     excel = historical.to_excel(index=False)
     st.download_button("Download Excel", excel, file_name="historical_valuations.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+st.markdown(create_info_card("Note", "Exported data is for demonstration. Integrate with real valuation history for production use."), unsafe_allow_html=True)
