@@ -1,5 +1,5 @@
 import streamlit as st
-from ivnse.core import fetch_fundamentals_yahoo, discounted_cash_flow, create_metric_card
+from ivnse.core import fetch_fundamentals_yahoo, discounted_cash_flow
 import math
 import pandas as pd
 
@@ -37,8 +37,3 @@ for name, g in scenarios:
 
 df = pd.DataFrame(results)
 st.bar_chart(df.set_index("Scenario")['Fair Value'])
-
-cols = st.columns(3)
-for i, row in df.iterrows():
-    with cols[i]:
-        st.markdown(create_metric_card(row['Scenario'], f"₹{row['Fair Value']:,.0f}"), unsafe_allow_html=True)

@@ -1,5 +1,5 @@
 import streamlit as st
-from ivnse.core import fetch_fundamentals_yahoo, create_metric_card
+from ivnse.core import fetch_fundamentals_yahoo
 import pandas as pd
 
 peer_groups = {
