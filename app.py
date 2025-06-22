@@ -1,19 +1,19 @@
-"""Streamlit Intrinsic Value Calculator — Enhanced NSE Edition v0.3
+"""Streamlit Intrinsic Value Calculator — Modern UI Edition v0.4
 
-New in v0.3:
-• Historical valuation trends & peer comparison
-• Sensitivity analysis with heatmaps
-• Multiple scenario modeling (Bull/Base/Bear)
-• Export functionality (Excel/CSV)
-• Advanced charts and analytics
-• Risk metrics and financial ratios
+New in v0.4:
+• Beautiful modern UI with glassmorphism design
+• Animated metrics and progress indicators
+• Enhanced color schemes and typography
+• Interactive dashboard layout
+• Modern card-based components
+• Responsive design elements
 
 > Setup
 
-1. pip install streamlit pandas yfinance requests plotly openpyxl
+1. pip install streamlit pandas yfinance requests plotly openpyxl streamlit-option-menu streamlit-elements
 2. Grab a free key at https://financialmodelingprep.com
 3. export FMP_API_KEY="YOUR_KEY" (or add to Streamlit Secrets)
-4. streamlit run intrinsic_value_app.py
+4. streamlit run app.py
 """
 
 from __future__ import annotations
